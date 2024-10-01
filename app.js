@@ -5,7 +5,7 @@ const mysql = require('mysql2');
 const path = require('path');
 // Ruta principal
 app.get('/', (req, res) => {
-  res.send('¡Hola, Mundo!');
+  res.redirect('/index');
 });
 
 // Inicia el servidor
@@ -26,6 +26,7 @@ conexion.connect(function(err) {
   console.log("Connected!");
 });
 
+//Con este use podemos cargar archivos como javascripts personales para cada interaccion de la pagina
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Profile
@@ -38,4 +39,7 @@ app.get('/login', (req, res) => {
 });
 app.get('/register', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'register.html'));
+});
+app.get('/index', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
