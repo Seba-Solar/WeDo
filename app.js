@@ -30,7 +30,7 @@ app.get('/', (req, res) => {
   res.redirect('/index');
 });
 app.get('/index', (req, res) => {
-  res.sendFile(path.join(__dirname, 'views', 'index.html'));
+  res.sendFile(path.join(__dirname, 'views', 'index2.html'));
 });
 app.get('/profile', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'profile.html'));
