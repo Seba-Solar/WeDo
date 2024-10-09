@@ -8,41 +8,28 @@
   </head>
   <body>
     <!-- Main Navbar -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#">Navbar</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#">Home</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Link</a>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Dropdown
-                </a>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="#">Action</a></li>
-                  <li><a class="dropdown-item" href="#">Another action</a></li>
-                  <li><hr class="dropdown-divider"></li>
-                  <li><a class="dropdown-item" href="#">Something else here</a></li>
-                </ul>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-              </li>
-            </ul>
-            <form class="d-flex" role="search">
-              <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-              <button class="btn btn-outline-success" type="submit">Search</button>
-            </form>
+    <nav class="navbar navbar-expand-lg ">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/index">WeDo</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="/index">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/publicaciones">Publicaciones</a>
+            </li>
+          </ul>
+        </div>
+        <div class="navbar-brand">
+          <div class="d-flex">
+            <button class="btn btn-outline-sucess"><a style="color: black" href="/profile">Ver Perfil</a></button>
           </div>
         </div>
+      </div>
     </nav>
 
     <!-- Layout con Grid para Navbar Lateral -->
@@ -51,13 +38,62 @@
         <!-- Navbar Lateral (izquierdo) -->
         <div class="col-md-3">
           <nav class="nav flex-column bg-light p-3" style="height: 100vh;">
-            <a class="nav-link active" aria-current="page" href="#">Active</a>
-            <a class="nav-link" href="#">Link</a>
-            <a class="nav-link" href="#">Link</a>
-            <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+            <div>
+              <label for="customRange1" class="form-label">Rango Precio</label>
+              <input type="range" class="form-range" id="customRange1">
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+              <label class="form-check-label" for="flexRadioDefault1">
+                Ya Cotizados
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
+              <label class="form-check-label" for="flexRadioDefault2">
+                Sin Cotizar
+              </label>
+            </div>
+            <div class="pt-3">
+              <select class="form-select form-select-sm" aria-label=".form-select-sm example">
+                <option selected>Seleccionar comuna</option>
+                <option value="1">Cerrillos</option>
+                <option value="2">Cerro Navia</option>
+                <option value="3">Conchalí</option>
+                <option value="4">El Bosque</option>
+                <option value="5">Estación Central</option>
+                <option value="6">Huechuraba</option>
+                <option value="7">Independencia</option>
+                <option value="8">La Cisterna</option>
+                <option value="9">La Florida</option>
+                <option value="10">La Granja</option>
+                <option value="11">La Pintana</option>
+                <option value="12">La Reina</option>
+                <option value="13">Las Condes</option>
+                <option value="14">Lo Barnechea</option>
+                <option value="15">Lo Espejo</option>
+                <option value="16">Lo Prado</option>
+                <option value="17">Macul</option>
+                <option value="18">Maipú</option>
+                <option value="19">Ñuñoa</option>
+                <option value="20">Pedro Aguirre Cerda</option>
+                <option value="21">Peñalolén</option>
+                <option value="22">Providencia</option>
+                <option value="23">Pudahuel</option>
+                <option value="24">Quilicura</option>
+                <option value="25">Quinta Normal</option>
+                <option value="26">Recoleta</option>
+                <option value="27">Renca</option>
+                <option value="28">San Joaquín</option>
+                <option value="29">San Miguel</option>
+                <option value="30">San Ramón</option>
+                <option value="31">Santiago</option>
+                <option value="32">Vitacura</option>
+              </select>            
+            </div>
           </nav>
         </div>
-        
+
         <!-- Contenido principal -->
         <div class="col-md-9">
           <!-- Contiene las cards centradas -->

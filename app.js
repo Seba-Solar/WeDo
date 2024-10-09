@@ -9,18 +9,18 @@ app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
 });
 
-// Conexión a la base de datos
-let conexion = mysql.createConnection({
-    host: "localhost",
-    database: "wedo",
-    user: "root",
-    password: ""
-});
+// // Conexión a la base de datos
+// let conexion = mysql.createConnection({
+//     host: "localhost",
+//     database: "wedo",
+//     user: "root",
+//     password: ""
+// });
 
-conexion.connect(function(err) {
-  if (err) throw err;
-  console.log("Connected!");
-});
+// conexion.connect(function(err) {
+//   if (err) throw err;
+//   console.log("Connected!");
+// });
 
 //Con este use podemos cargar archivos como javascripts personales para cada interaccion de la pagina
 app.use(express.static(path.join(__dirname, 'public')));
