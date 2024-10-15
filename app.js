@@ -51,6 +51,10 @@ app.get('/publicaciones', (req, res) => {
 app.get('/publicacion',(req,res) => {
   res.sendFile(path.join(__dirname,'views','publicacion_detalle.html'));
 });
+app.get('/crear_publi',(req,res) => {
+  res.sendFile(path.join(__dirname,'views','crear_publi.html'));
+});
+
 
 //END-POINTS
 
@@ -98,6 +102,23 @@ app.get('/getPublicaciones', (req, res) => {
   });
 });
 
+app.get('/getPublicaciones/:titulo', (req, res) => {
+  const nombre = req.params.titulo;
+  const query = 'SELECT * FROM PUBLICACION WHERE titulo = ?';
+
+  conexion.query(query, [nombre], (err, results) => {
+    if (err) {  
+      console.error(err);
+      res.status(500).send({ message: 'Error al obtener datos' });
+    } else if (results.length === 0) {
+      res.status(404).send({ message: 'Publicación no encontrada' });
+    } else {
+      res.send(results);
+    }
+  });
+});
+
+
 // -------------- REGISTER ---------------- //
 app.post('/registrar', (req, res) => {
   const nombre = req.body.nombre;
@@ -127,7 +148,7 @@ app.use(session({
 	resave: true,
 	saveUninitialized: true
 }));
-
+//Necesarios para manipular la session del usuario
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -158,3 +179,28 @@ app.post('/auth', function(request, response) {
 		response.end();
 	}
 });
+
+// -------------- Crear publicacion ---------------- //
+app.post('/publicar', (req, res) => {
+  const titulo = req.body.titulo;
+  const pass = req.body.pass; 
+  const descripcion = req.body.descripcion;
+  const precioestimado = req.body.precioestimado;
+  const imagen_p = req.body.imagen_p;
+  const id_cliente = req.body.id_cliente;
+  const nombre_cliente = req.body.nombre_cliente;
+
+  const query = `INSERT into publicacion (nombre, pass, descripcion, precioestimado, imagen_p, id_cliente, nombre_cliente) 
+  VALUES ('${titulo}','${pass}','${descripcion}','${precioestimado}','${imagen_p}','${id_cliente}','${nombre_cliente}')`;
+
+  conexion.query(query, (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send({ message: 'Error al insertar datos' });
+    } else {
+      res.redirect('/publicacion');
+    }
+  });
+});
+
+const fs = require('fs');
