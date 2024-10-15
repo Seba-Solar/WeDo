@@ -33,17 +33,17 @@
                     <h3>Iniciar Sesion</h3>
                 </div>
                 <div class="card-body">
-                    <form>
+                    <form action="/auth" method="post">
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email address</label>
-                            <input type="email" class="form-control" id="email" placeholder="Enter email">
+                            <label for="email" class="form-label">Correo Electronico</label>
+                            <input type="email" class="form-control" id="correo" name="correo" placeholder="Ingresa tu correo">
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" placeholder="Password">
+                            <input type="password" class="form-control" id="pass" name="pass" placeholder="Contraseña...">
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Login</button>
+                            <button type="submit" value="Login" class="btn btn-primary">Login</button>
                         </div>
                     </form>
                 </div>

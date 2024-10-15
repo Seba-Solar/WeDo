@@ -4,6 +4,9 @@ const port = 3000;
 const mysql = require('mysql2');
 const path = require('path');
 const bodyParser = require('body-parser');
+const session = require('express-session');
+// Middleware para analizar el cuerpo de las solicitudes JSON
+app.use(express.json());
 
 // Inicia el servidor
 app.listen(port, () => {
@@ -116,4 +119,42 @@ app.post('/registrar', (req, res) => {
       res.redirect('/login');
     }
   });
+});
+
+// -------------- LOGIN ---------------- //
+app.use(session({
+	secret: 'secret',
+	resave: true,
+	saveUninitialized: true
+}));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.post('/auth', function(request, response) {
+	// Capture the input fields
+	let correo = request.body.correo;
+	let pass = request.body.pass;
+	// Ensure the input fields exists and are not empty
+	if (correo && pass) {
+		// Execute SQL query that'll select the account from the database based on the specified username and password
+		conexion.query('SELECT * FROM cliente WHERE correo = ? AND pass = ?', [correo, pass], function(error, results, fields) {
+			// If there is an issue with the query, output the error
+			if (error) throw error;
+			// If the account exists
+			if (results.length > 0) {
+				// Authenticate the user
+				request.session.loggedin = true;
+				request.session.correo = correo;
+				// Redirect to home page
+				response.redirect('/publicaciones');
+			} else {
+				response.send('Verifica que las credenciales esten bien!');
+			}			
+			response.end();
+		});
+	} else {
+		response.send('Porfavor ingresa ambos campos');
+		response.end();
+	}
 });
