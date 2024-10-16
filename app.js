@@ -96,7 +96,7 @@ app.get('/getPublicaciones', (req, res) => {
       res.status(500).send({ message: 'Error al obtener datos' });
       console.log(req.query);
     } else {
-      res.send(results);
+      res.json(results)
       
     }
   });
@@ -179,29 +179,6 @@ app.post('/auth', function(request, response) {
 		response.end();
 	}
 });
-
-// -------------- Crear publicacion ---------------- //
-// app.post('/publicar', (req, res) => {
-//   const titulo = req.body.titulo;
-//   const pass = req.body.pass; 
-//   const descripcion = req.body.descripcion;
-//   const precioestimado = req.body.precioestimado;
-//   const imagen_p = req.body.imagen_p;
-//   const id_cliente = req.body.id_cliente;
-//   const nombre_cliente = req.body.nombre_cliente;
-
-//   const query = `INSERT into publicacion (nombre, pass, descripcion, precioestimado, imagen_p, id_cliente, nombre_cliente) 
-//   VALUES ('${titulo}','${pass}','${descripcion}','${precioestimado}','${imagen_p}','${id_cliente}','${nombre_cliente}')`;
-
-//   conexion.query(query, (err, results) => {
-//     if (err) {
-//       console.error(err);
-//       res.status(500).send({ message: 'Error al insertar datos' });
-//     } else {
-//       res.redirect('/publicacion');
-//     }
-//   });
-// });
 
 // CREACION DE PUBLICACION CON IMAGENES BLOB USANDO BUFFER PARA GUARDARLAS BINARIAMENTE
 const multer = require('multer');

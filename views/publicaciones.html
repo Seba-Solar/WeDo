@@ -104,7 +104,7 @@
         <!-- Contenido principal -->
         <div class="col-md-9">
           <!-- Contiene las cards centradas -->
-          <div class="container d-flex justify-content-center">
+          <div class="container d-flex justify-content-center" id="contenedor_publis">
             <div class="row w-75">
               <div class="card p-0" style="max-width: 540px;">
                 <div class="row g-0">
@@ -124,52 +124,41 @@
               </div>              
             </div>  
           </div>
-          <div class="container d-flex justify-content-center">
-            <div class="row w-75">
-              <div class="card p-0" style="max-width: 540px;">
-                <div class="row g-0">
-                  <div class="col-md-4">
-                    <img src="..." class="img-fluid rounded-start" alt="...">
-                  </div>
-                  <div class="col-md-8">
-                    <div class="card-body">
-                      <h5 class="card-title">Publicacion Test</h5>
-                      <p class="card-text">Descripcion de la imagen</p>
-                      <p class="fst-italic">Precio Estimado</p>
-                      <p class="card-text"><small class="text-body-secondary">Fecha de publicacion</small></p>
-                      <button type="button" class="btn btn-primary">Ver</button>
-                    </div>
-                  </div>
-                </div>
-              </div>              
-            </div>  
-          </div>
-          <div class="container d-flex justify-content-center">
-            <div class="row w-75">
-              <div class="card p-0" style="max-width: 540px;">
-                <div class="row g-0">
-                  <div class="col-md-4">
-                    <img src="..." class="img-fluid rounded-start" alt="...">
-                  </div>
-                  <div class="col-md-8">
-                    <div class="card-body">
-                      <h5 class="card-title">Publicacion Test</h5>
-                      <p class="card-text">Descripcion de la imagen</p>
-                      <p class="fst-italic">Precio Estimado</p>
-                      <p class="card-text"><small class="text-body-secondary">Fecha de publicacion</small></p>
-                      <button type="button" class="btn btn-primary">Ver</button>
-                    </div>
-                  </div>
-                </div>
-              </div>              
-            </div>  
-          </div>
+          
         </div>
       </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="/js/profile.js"></script>
+    <script>
+      //Funcion
+      async function cargaPublicaciones() {
+    try {
+        const respuesta = await fetch(`/getPublicaciones`);
+        const jsonPublicaciones = await respuesta.json();
+
+        const contenedorPublicaciones = document.getElementById('contenedor_publis');
+        for (var i = 0; i < jsonPublicaciones.length; i++){
+          //Armado de cards con la informacion de las publicaciones
+          const imagenes_por_id =  await fetch(`/publicacion/${jsonPublicaciones[i].id}/imagenes`);
+          //El arreglo 0 de imagenes trae consigo el id de la primera imagen adjuntada a la publicacion
+          const imagenes  = await imagenes_por_id.json();
+          const idNumber = imagenes[0].id;
+          const img = document.createElement('img');
+          img.src = `/imagen/${idNumber}`;
+          img.classList.add('img-fluid', 'col-md-4'); 
+          contenedorPublicaciones.appendChild(img);
+          console.log(idNumber);
+        }
+    } catch (error) {
+        console.log('Error al cargar las publicaciones ', error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    cargaPublicaciones();
+});
+    </script>
   </body>
 </html>
 
