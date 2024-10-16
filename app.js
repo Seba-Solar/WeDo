@@ -181,26 +181,135 @@ app.post('/auth', function(request, response) {
 });
 
 // -------------- Crear publicacion ---------------- //
-app.post('/publicar', (req, res) => {
-  const titulo = req.body.titulo;
-  const pass = req.body.pass; 
-  const descripcion = req.body.descripcion;
-  const precioestimado = req.body.precioestimado;
-  const imagen_p = req.body.imagen_p;
-  const id_cliente = req.body.id_cliente;
-  const nombre_cliente = req.body.nombre_cliente;
+// app.post('/publicar', (req, res) => {
+//   const titulo = req.body.titulo;
+//   const pass = req.body.pass; 
+//   const descripcion = req.body.descripcion;
+//   const precioestimado = req.body.precioestimado;
+//   const imagen_p = req.body.imagen_p;
+//   const id_cliente = req.body.id_cliente;
+//   const nombre_cliente = req.body.nombre_cliente;
 
-  const query = `INSERT into publicacion (nombre, pass, descripcion, precioestimado, imagen_p, id_cliente, nombre_cliente) 
-  VALUES ('${titulo}','${pass}','${descripcion}','${precioestimado}','${imagen_p}','${id_cliente}','${nombre_cliente}')`;
+//   const query = `INSERT into publicacion (nombre, pass, descripcion, precioestimado, imagen_p, id_cliente, nombre_cliente) 
+//   VALUES ('${titulo}','${pass}','${descripcion}','${precioestimado}','${imagen_p}','${id_cliente}','${nombre_cliente}')`;
 
-  conexion.query(query, (err, results) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send({ message: 'Error al insertar datos' });
-    } else {
-      res.redirect('/publicacion');
-    }
+//   conexion.query(query, (err, results) => {
+//     if (err) {
+//       console.error(err);
+//       res.status(500).send({ message: 'Error al insertar datos' });
+//     } else {
+//       res.redirect('/publicacion');
+//     }
+//   });
+// });
+
+// CREACION DE PUBLICACION CON IMAGENES BLOB USANDO BUFFER PARA GUARDARLAS BINARIAMENTE
+const multer = require('multer');
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+// Manejar la ruta para publicar con múltiples imágenes
+app.post('/publicar', upload.array('imagenes', 10), (req, res) => {
+  const { titulo, descripcion, precioestimado } = req.body;
+  const imagenes = req.files; // Array de imágenes como buffers
+
+  // Comenzamos una transacción para garantizar la atomicidad
+  conexion.beginTransaction(err => {
+      if (err) {
+          console.error(err);
+          return res.status(500).send({ message: 'Error al iniciar la transacción' });
+      }
+
+      // Primero insertamos los datos de la publicación
+      const queryPublicacion = 'INSERT INTO PUBLICACION (titulo, descripcion, precio_estimado) VALUES (?, ?, ?)';
+      const valuesPublicacion = [titulo, descripcion, precioestimado];
+
+      conexion.query(queryPublicacion, valuesPublicacion, (err, results) => {
+          if (err) {
+              console.error(err);
+              return conexion.rollback(() => {
+                  res.status(500).send({ message: 'Error al guardar la publicación' });
+              });
+          }
+
+          const publicacionId = results.insertId; // Obtener el ID de la publicación insertada
+
+          // Insertar las imágenes relacionadas
+          const queryImagen = 'INSERT INTO IMAGENES (publicacion_id, imagen) VALUES (?, ?)';
+          const promises = imagenes.map(imagen => {
+              return new Promise((resolve, reject) => {
+                  const valuesImagen = [publicacionId, imagen.buffer];
+                  conexion.query(queryImagen, valuesImagen, (err, results) => {
+                      if (err) {
+                          return reject(err);
+                      }
+                      resolve(results);
+                  });
+              });
+          });
+
+          // Ejecutar todas las promesas de inserción de imágenes
+          Promise.all(promises)
+              .then(() => {
+                  // Confirmar la transacción si todo ha ido bien
+                  conexion.commit(err => {
+                      if (err) {
+                          return conexion.rollback(() => {
+                              res.status(500).send({ message: 'Error al confirmar la transacción' });
+                          });
+                      }
+                      res.send({ message: 'Publicación y imágenes guardadas exitosamente' });
+                  });
+              })
+              .catch(err => {
+                  console.error(err);
+                  conexion.rollback(() => {
+                      res.status(500).send({ message: 'Error al guardar las imágenes' });
+                  });
+              });
+      });
   });
 });
 
-const fs = require('fs');
+// Ruta para obtener todas las imágenes de una publicación específica
+app.get('/publicacion/:id/imagenes', (req, res) => {
+  const publicacionId = req.params.id;
+
+  // Consulta para obtener las IDs de las imágenes de la publicación
+  const query = 'SELECT id FROM IMAGENES WHERE publicacion_id = ?';
+  conexion.query(query, [publicacionId], (err, results) => {
+      if (err) {
+          console.error(err);
+          return res.status(500).send({ message: 'Error al obtener las imágenes' });
+      }
+
+      // Si no se encuentran imágenes
+      if (results.length === 0) {
+          return res.status(404).send({ message: 'No se encontraron imágenes para esta publicación' });
+      }
+
+      // Enviar las IDs de las imágenes en formato JSON
+      res.json(results);
+  });
+});
+
+// Ruta para obtener las imágenes de una publicación
+app.get('/imagen/:id', (req, res) => {
+  const imagenId = req.params.id;
+
+  const query = 'SELECT imagen FROM IMAGENES WHERE id = ?';
+  conexion.query(query, [imagenId], (err, results) => {
+      if (err) {
+          console.error(err);
+          return res.status(500).send({ message: 'Error al obtener la imagen' });
+      }
+      
+      if (results.length === 0) {
+          return res.status(404).send({ message: 'Imagen no encontrada' });
+      }
+
+      // Configurar el tipo de contenido adecuado (en este caso asumimos que es imagen JPEG)
+      res.setHeader('Content-Type', 'image/jpeg');
+      res.send(results[0].imagen);
+  });
+});
