@@ -7,6 +7,9 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 // Middleware para analizar el cuerpo de las solicitudes JSON
 app.use(express.json());
+// Para cargar los detalles de las publicaciones
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 // Inicia el servidor
 app.listen(port, () => {
@@ -48,9 +51,9 @@ app.get('/register', (req, res) => {
 app.get('/publicaciones', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'publicaciones.html'));
 });
-app.get('/publicacion',(req,res) => {
-  res.sendFile(path.join(__dirname,'views','publicacion_detalle.html'));
-});
+// app.get('/publicacion',(req,res) => {
+//   res.sendFile(path.join(__dirname,'views','publicacion_detalle.html'));
+// });
 app.get('/crear_publi',(req,res) => {
   res.sendFile(path.join(__dirname,'views','crear_publi.html'));
 });
@@ -288,5 +291,55 @@ app.get('/imagen/:id', (req, res) => {
       // Configurar el tipo de contenido adecuado (en este caso asumimos que es imagen JPEG)
       res.setHeader('Content-Type', 'image/jpeg');
       res.send(results[0].imagen);
+  });
+});
+
+// app.get('/publicacion/detalle/:id',(req,res) =>{
+
+//   const idPublicacion = req.params.id;
+//   console.log(idPublicacion)
+//   const query = 'SELECT id, titulo, descripcion, precio_estimado FROM publicacion WHERE id = ?';
+//   conexion.query(query, idPublicacion,(err,results)=>{
+//     if (err){
+//       console.error(err);
+//       return res.status(500).send({ message: 'Publicacion no encontrada'});
+//     }
+
+//      // Suponiendo que results tiene al menos un elemento
+//      const publicacion = results[0];
+
+//      // Renderiza la vista con los datos obtenidos
+//      res.render('publicacion_detalle', { publicacion });
+//   })
+// })
+app.get('/publicacion/detalle/:id', (req, res) => {
+  const idPublicacion = req.params.id;
+
+  const queryPublicacion = 'SELECT id, titulo, descripcion, precio_estimado FROM publicacion WHERE id = ?';
+  const queryImagen = 'SELECT imagen FROM IMAGENES WHERE publicacion_id = ?'; // Cambia esto si es necesario
+
+  conexion.query(queryPublicacion, [idPublicacion], (err, resultadosPublicacion) => {
+      if (err) {
+          console.error(err);
+          return res.status(500).send({ message: 'Error al obtener la publicación' });
+      }
+
+      if (resultadosPublicacion.length === 0) {
+          return res.status(404).send({ message: 'Publicación no encontrada' });
+      }
+
+      const publicacion = resultadosPublicacion[0];
+
+      conexion.query(queryImagen, [idPublicacion], (err, resultadosImagen) => {
+          if (err) {
+              console.error(err);
+              return res.status(500).send({ message: 'Error al obtener las imágenes' });
+          }
+
+          // Extraer las imágenes
+          const imagenes = resultadosImagen.map(row => row.imagen);
+
+          res.render('publicacion_detalle', { publicacion, imagenes });
+      });
   });
 });

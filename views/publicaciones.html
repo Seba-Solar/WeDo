@@ -141,7 +141,9 @@
                           <h5 class="card-title">${jsonPublicaciones[i].titulo}</h5>
                           <p class="card-text">${jsonPublicaciones[i].descripcion}</p>
                           <p class="fst-italic">${jsonPublicaciones[i].precio_estimado}</p>
-                          <button type="button" class="btn btn-primary">Ver</button>
+                          <button type="button" class="btn btn-primary">
+                            <a href="/publicacion/detalle/${jsonPublicaciones[i].id}">Ver Publicacion</a>
+                          </button>
                         </div>
                       </div>
                     </div>
