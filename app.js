@@ -5,6 +5,14 @@ const mysql = require('mysql2');
 const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+
+//Para la creacion de imagenes y guardar la memoria y su buffer usaremos
+//Multer Storage y Upload
+const multer = require('multer');
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+
 // Middleware para analizar el cuerpo de las solicitudes JSON
 app.use(express.json());
 // Para cargar los detalles de las publicaciones
@@ -29,8 +37,56 @@ conexion.connect(function(err) {
   console.log("Connected!");
 });
 
-//Con este use podemos cargar archivos como javascripts personales para cada interaccion de la pagina
+//Carga de los estaticos
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+	secret: 'secret',
+	resave: true,
+	saveUninitialized: true
+}));
+//Middelware para controlar el acceso a las paginas solamente si el usuario esta logeado
+function isLoggedIn(req, res, next) {
+  if (req.session.loggedin) {
+      next();  
+  } else {
+      res.redirect('/login');
+  }
+}
+
+//Necesarios para manipular la session del usuario
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.post('/auth', function(request, response) {
+	// Capture the input fields
+	let correo = request.body.correo;
+	let pass = request.body.pass;
+	// Ensure the input fields exists and are not empty
+	if (correo && pass) {
+		// Execute SQL query that'll select the account from the database based on the specified username and password
+		conexion.query('SELECT * FROM cliente WHERE correo = ? AND pass = ?', [correo, pass], function(error, results, fields) {
+			// If there is an issue with the query, output the error
+			if (error) throw error;
+			// If the account exists
+			if (results.length > 0) {
+				// Authenticate the user
+				request.session.loggedin = true;
+				request.session.correo = correo;
+        request.session.userId = results[0].id;
+        request.session.nombre = results[0].nombre;
+				// Redirect to home page
+				response.redirect('/publicaciones');
+			} else {
+				response.send('Verifica que las credenciales esten bien!');
+			}			
+			response.end();
+		});
+	} else {
+		response.send('Porfavor ingresa ambos campos');
+		response.end();
+	}
+});
+
 
 // Routing
 app.get('/', (req, res) => {
@@ -39,7 +95,7 @@ app.get('/', (req, res) => {
 app.get('/index', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
-app.get('/profile', (req, res) => {
+app.get('/profile',isLoggedIn, (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'profile.html'));
 });
 app.get('/login', (req, res) => {
@@ -48,13 +104,13 @@ app.get('/login', (req, res) => {
 app.get('/register', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'register.html'));
 });
-app.get('/publicaciones', (req, res) => {
+app.get('/publicaciones',isLoggedIn, (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'publicaciones.html'));
 });
 // app.get('/publicacion',(req,res) => {
 //   res.sendFile(path.join(__dirname,'views','publicacion_detalle.html'));
 // });
-app.get('/crear_publi',(req,res) => {
+app.get('/crear_publi', isLoggedIn, (req,res) => {
   res.sendFile(path.join(__dirname,'views','crear_publi.html'));
 });
 
@@ -120,73 +176,49 @@ app.get('/getPublicaciones/:titulo', (req, res) => {
     }
   });
 });
+// --------------- Fin de End-Points
 
 
 // -------------- REGISTER ---------------- //
-app.post('/registrar', (req, res) => {
-  const nombre = req.body.nombre;
+
+// -------------- REGISTER ---------------- //
+app.post('/registrar', upload.single('imagen_p'), (req, res) => {
+  
+  const nombre = req.body.usuario;
   const pass = req.body.pass; 
-  const correo = req.body.correo;
+  const correo = req.body.email;
   const rut = req.body.rut;
-  const imagen_p = req.body.imagen_p;
   const telefono = req.body.telefono;
   const direccion = req.body.direccion;
 
-  const query = `INSERT into cliente (nombre, pass, imagen_p, rut, correo, telefono, direccion) 
-  VALUES ('${nombre}','${pass}','${imagen_p}','${rut}','${correo}','${telefono}','${direccion}')`;
+  
+  const imagen_p = req.file ? req.file.buffer : null;
 
-  conexion.query(query, (err, results) => {
+  
+  if (!imagen_p) {
+    return res.status(400).send({ message: 'Se requiere una imagen de perfil' });
+  }
+
+  const query = `INSERT INTO cliente (nombre, pass, imagen_p, rut, correo, telefono, direccion) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
+
+  const values = [nombre, pass, imagen_p, rut, correo, telefono, direccion];
+
+  conexion.query(query, values, (err, results) => {
     if (err) {
       console.error(err);
-      res.status(500).send({ message: 'Error al insertar datos' });
+      return res.status(500).send({ message: 'Error al insertar datos' });
     } else {
       res.redirect('/login');
     }
   });
 });
 
+
 // -------------- LOGIN ---------------- //
-app.use(session({
-	secret: 'secret',
-	resave: true,
-	saveUninitialized: true
-}));
-//Necesarios para manipular la session del usuario
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-app.post('/auth', function(request, response) {
-	// Capture the input fields
-	let correo = request.body.correo;
-	let pass = request.body.pass;
-	// Ensure the input fields exists and are not empty
-	if (correo && pass) {
-		// Execute SQL query that'll select the account from the database based on the specified username and password
-		conexion.query('SELECT * FROM cliente WHERE correo = ? AND pass = ?', [correo, pass], function(error, results, fields) {
-			// If there is an issue with the query, output the error
-			if (error) throw error;
-			// If the account exists
-			if (results.length > 0) {
-				// Authenticate the user
-				request.session.loggedin = true;
-				request.session.correo = correo;
-				// Redirect to home page
-				response.redirect('/publicaciones');
-			} else {
-				response.send('Verifica que las credenciales esten bien!');
-			}			
-			response.end();
-		});
-	} else {
-		response.send('Porfavor ingresa ambos campos');
-		response.end();
-	}
-});
 
-// CREACION DE PUBLICACION CON IMAGENES BLOB USANDO BUFFER PARA GUARDARLAS BINARIAMENTE
-const multer = require('multer');
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+
 
 // Manejar la ruta para publicar con múltiples imágenes
 app.post('/publicar', upload.array('imagenes', 10), (req, res) => {

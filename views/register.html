@@ -33,41 +33,42 @@
                     <h3>Registro</h3>
                 </div>
                 <div class="card-body">
-                    <form action="/registrar" method="POST" id="registerForm">
-                        <div class="form-group mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="usuario" name="usuario" placeholder="Enter username">
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="email" class="form-label">Email address</label>
-                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter email">
-                        </div>
-                        <div class="form-group mb-3">
-                          <label for="rut" class="form-label">RUT</label>
-                          <input type="text" class="form-control" id="rut" name="rut" placeholder="Ingresa Rut">
-                      </div>
-                        <div class="form-group mb-3">
-                            <label for="phone" class="form-label">Telefono</label>
-                            <input type="text" class="form-control" id="telefono" name="telefono" placeholder="Ingresa tu numero">
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="direccion" class="form-label">Direccion</label>
-                            <input type="text" class="form-control" id="direccion" name="direccion" placeholder="Ingresa tu direccion">
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="pass" name="pass" placeholder="Ingresa tu contraseña">
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
-                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirmar contraseña">
-                        </div>
-                        <div class="form-group mb-3">
-                          <label for="imagenDePerfil" class="form-label">Sube tu imagen de perfil</label>
-                          <input type="file" class="form-control" name="foto" id="foto" accept="image/*">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Register</button>
-                    </form>
+                  <form action="/registrar" method="POST" id="registerForm" enctype="multipart/form-data">
+                    <div class="form-group mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="usuario" name="usuario" placeholder="Enter username" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="email" class="form-label">Email address</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="rut" class="form-label">RUT</label>
+                        <input type="text" class="form-control" id="rut" name="rut" placeholder="Ingresa Rut" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="phone" class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" id="telefono" name="telefono" placeholder="Ingresa tu número" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="direccion" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="direccion" name="direccion" placeholder="Ingresa tu dirección" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="pass" name="pass" placeholder="Ingresa tu contraseña" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirmar contraseña" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="imagenDePerfil" class="form-label">Sube tu imagen de perfil</label>
+                        <input type="file" class="form-control" name="imagen_p" id="foto" accept="image/*" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Register</button>
+                </form>
+                
                 </div>
                 <div class="card-footer text-center">
                     <small class="text-muted">Ya tienes cuenta? <a href="/login">Inicia Sesion Aqui</a></small>
