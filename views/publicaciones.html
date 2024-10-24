@@ -117,6 +117,7 @@
       async function cargaPublicaciones() {
         try {
           const respuesta = await fetch(`/getPublicaciones`);
+          console.log(respuesta);
           const jsonPublicaciones = await respuesta.json();
 
           const contenedorPublicaciones = document.getElementById('contenedor_publis');

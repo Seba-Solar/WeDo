@@ -96,7 +96,14 @@ app.get('/index', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 app.get('/profile',isLoggedIn, (req, res) => {
-  res.sendFile(path.join(__dirname, 'views', 'profile.html'));
+  let usuario = {
+    correo: req.session.correo,
+    nombre: req.session.nombre,
+    id_usuario: req.session.userId
+  };
+  
+  console.log('ID USUARIO',usuario.id_usuario);
+  res.render('profile', { usuario });
 });
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'login.html'));
@@ -107,13 +114,12 @@ app.get('/register', (req, res) => {
 app.get('/publicaciones',isLoggedIn, (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'publicaciones.html'));
 });
-// app.get('/publicacion',(req,res) => {
-//   res.sendFile(path.join(__dirname,'views','publicacion_detalle.html'));
-// });
 app.get('/crear_publi', isLoggedIn, (req,res) => {
   res.sendFile(path.join(__dirname,'views','crear_publi.html'));
 });
-
+app.get('/registrar_empresa',(req,res)=>{
+  res.sendFile(path.join(__dirname,'views','register_empresa.html'));
+});
 
 //END-POINTS
 
@@ -179,7 +185,8 @@ app.get('/getPublicaciones/:titulo', (req, res) => {
 // --------------- Fin de End-Points
 
 
-// -------------- REGISTER ---------------- //
+
+
 
 // -------------- REGISTER ---------------- //
 app.post('/registrar', upload.single('imagen_p'), (req, res) => {
@@ -215,16 +222,24 @@ app.post('/registrar', upload.single('imagen_p'), (req, res) => {
 });
 
 
+
+
+
 // -------------- LOGIN ---------------- //
 
 
 
 
-// Manejar la ruta para publicar con múltiples imágenes
+// PUBLICAR
+
 app.post('/publicar', upload.array('imagenes', 10), (req, res) => {
   const { titulo, descripcion, precioestimado } = req.body;
   const imagenes = req.files; // Array de imágenes como buffers
-
+  let usuario = {
+    correo: req.session.correo,
+    nombre: req.session.nombre,
+    id_usuario: req.session.userId
+  };
   // Comenzamos una transacción para garantizar la atomicidad
   conexion.beginTransaction(err => {
       if (err) {
@@ -233,8 +248,8 @@ app.post('/publicar', upload.array('imagenes', 10), (req, res) => {
       }
 
       // Primero insertamos los datos de la publicación
-      const queryPublicacion = 'INSERT INTO PUBLICACION (titulo, descripcion, precio_estimado) VALUES (?, ?, ?)';
-      const valuesPublicacion = [titulo, descripcion, precioestimado];
+      const queryPublicacion = 'INSERT INTO PUBLICACION (titulo, descripcion, precio_estimado, id_cliente, nombre_cliente) VALUES (?, ?, ?, ?, ?)';
+      const valuesPublicacion = [titulo, descripcion, precioestimado,usuario.id_usuario,usuario.nombre];
 
       conexion.query(queryPublicacion, valuesPublicacion, (err, results) => {
           if (err) {
@@ -270,7 +285,7 @@ app.post('/publicar', upload.array('imagenes', 10), (req, res) => {
                               res.status(500).send({ message: 'Error al confirmar la transacción' });
                           });
                       }
-                      res.send({ message: 'Publicación y imágenes guardadas exitosamente' });
+                      res.redirect('/publicaciones');
                   });
               })
               .catch(err => {
@@ -326,24 +341,6 @@ app.get('/imagen/:id', (req, res) => {
   });
 });
 
-// app.get('/publicacion/detalle/:id',(req,res) =>{
-
-//   const idPublicacion = req.params.id;
-//   console.log(idPublicacion)
-//   const query = 'SELECT id, titulo, descripcion, precio_estimado FROM publicacion WHERE id = ?';
-//   conexion.query(query, idPublicacion,(err,results)=>{
-//     if (err){
-//       console.error(err);
-//       return res.status(500).send({ message: 'Publicacion no encontrada'});
-//     }
-
-//      // Suponiendo que results tiene al menos un elemento
-//      const publicacion = results[0];
-
-//      // Renderiza la vista con los datos obtenidos
-//      res.render('publicacion_detalle', { publicacion });
-//   })
-// })
 app.get('/publicacion/detalle/:id', (req, res) => {
   const idPublicacion = req.params.id;
 
