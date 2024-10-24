@@ -95,6 +95,7 @@ app.get('/', (req, res) => {
 app.get('/index', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
+// Acceso con las variables del usuario
 app.get('/profile',isLoggedIn, (req, res) => {
   let usuario = {
     correo: req.session.correo,
@@ -105,6 +106,8 @@ app.get('/profile',isLoggedIn, (req, res) => {
   console.log('ID USUARIO',usuario.id_usuario);
   res.render('profile', { usuario });
 });
+
+
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'login.html'));
 });
@@ -221,12 +224,56 @@ app.post('/registrar', upload.single('imagen_p'), (req, res) => {
   });
 });
 
+// -------------- REGISTER ---------------- //
+app.post('/registrar_empresa_datos', upload.single('imagen_p'), (req, res) => {
+  
+  const nombre = req.body.usuario;
+  const pass = req.body.pass; 
+  const correo = req.body.email;
+  const rut_empresa = req.body.rut;
+  const telefono = req.body.telefono;
+  const direccion = req.body.direccion;
+  const razon = req.body.razon;
+
+  
+  const imagen_p = req.file ? req.file.buffer : null;
+
+  
+  if (!imagen_p) {
+    return res.status(400).send({ message: 'Se requiere una imagen de perfil' });
+  }
+
+  const query = `INSERT INTO empresa (nombre, pass, imagen_p, rut_empresa, correo, telefono, direccion, razon) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
+  const values = [nombre, pass, imagen_p, rut_empresa, correo, telefono, direccion, razon];
+
+  conexion.query(query, values, (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send({ message: 'Error al insertar datos' });
+    } else {
+      res.redirect('/login');
+    }
+  });
+});
 
 
-
-
-// -------------- LOGIN ---------------- //
-
+// Update de datos del usuario
+// app.post('/update_profile', (req,res) =>{
+//   //Query de usuario
+//   let profile_form_data = {
+//     nombre: xxx,
+//     correo: xxx,
+//     pass: xxx,
+//     telefono: xxx,
+//     direccion: xxx,
+//     imagen_p: xxxx
+//   }
+//   const queryUpdateUser = `UPDATE cliente SET nombre = ${profile_form
+//     _data.nombre}, pass, imagen_p, rut, correo, telefono, direccion`;
+//   //Retorno
+// });
 
 
 
