@@ -58,48 +58,53 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.post('/auth', function(request, response) {
-	// Capture the input fields
 	let correo = request.body.correo;
 	let pass = request.body.pass;
-	// Ensure the input fields exists and are not empty
+
 	if (correo && pass) {
-		// Execute SQL query that'll select the account from the database based on the specified username and password
-		conexion.query('SELECT * FROM cliente WHERE correo = ? AND pass = ?', [correo, pass], function(error, results, fields) {
-			// If there is an issue with the query, output the error
+		conexion.query('SELECT * FROM cliente WHERE correo = ? AND pass = ?', [correo, pass], function(error, results) {
 			if (error) throw error;
-			// If the account exists
+
 			if (results.length > 0) {
-				// Authenticate the user
+				// Client credentials are valid
 				request.session.loggedin = true;
 				request.session.correo = correo;
-        request.session.userId = results[0].id;
-        request.session.nombre = results[0].nombre;
-				// Redirect to home page
-				response.redirect('/publicaciones');
+				request.session.userId = results[0].id;
+				request.session.nombre = results[0].nombre;
+				
+				return response.redirect('/publicaciones'); // Use return to prevent further execution
 			} else {
-				response.send('Verifica que las credenciales esten bien!');
-			}			
-			response.end();
+				// Check for company credentials
+				conexion.query('SELECT * FROM empresa WHERE correo = ? AND pass = ?', [correo, pass], function(error, results) {
+					if (error) throw error;
+
+					if (results.length > 0) {
+						// Company credentials are valid
+						request.session.loggedin = true;
+						request.session.isEmpresa = true;
+						request.session.correo = correo;
+						request.session.userId = results[0].id;
+						request.session.nombre = results[0].nombre;
+
+						return response.redirect('/publicaciones'); // Use return to prevent further execution
+					} else {
+						// Invalid credentials
+						return response.send('Credenciales inválidas'); // Send response and return
+					}
+				});
+			}
 		});
 	} else {
-		response.send('Porfavor ingresa ambos campos');
-		response.end();
+		response.send('Por favor ingresa ambos campos');
 	}
 });
 
 // Cerrar session
 app.get('/logout', function (req, res, next) {
   // logout logic
-
-  // clear the user from the session object and save.
-  // this will ensure that re-using the old session id
-  // does not have a logged in user
   req.session.user = null
   req.session.save(function (err) {
     if (err) next(err)
-
-    // regenerate the session, which is good practice to help
-    // guard against forms of session fixation
     req.session.regenerate(function (err) {
       if (err) next(err)
       res.redirect('/')
@@ -262,7 +267,7 @@ app.post('/registrar_empresa_datos', upload.single('imagen_p'), (req, res) => {
     return res.status(400).send({ message: 'Se requiere una imagen de perfil' });
   }
 
-  const query = `INSERT INTO empresa (nombre, pass, imagen_p, rut_empresa, correo, telefono, direccion, razon) 
+  const query = `INSERT INTO empresa (nombre, pass, imagen_p, rut, correo, telefono, direccion, razon) 
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
   const values = [nombre, pass, imagen_p, rut_empresa, correo, telefono, direccion, razon];
