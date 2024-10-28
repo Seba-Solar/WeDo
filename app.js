@@ -298,7 +298,7 @@ app.post('/registrar_empresa_datos', upload.single('imagen_p'), (req, res) => {
 
 // PUBLICAR
 
-app.post('/publicar', upload.array('imagenes', 10), (req, res) => {
+app.post('/publicar', upload.array('imagenes', 10),isLoggedIn, (req, res) => {
   const { titulo, descripcion, precioestimado } = req.body;
   const imagenes = req.files; // Array de imágenes como buffers
   let usuario = {
@@ -365,7 +365,7 @@ app.post('/publicar', upload.array('imagenes', 10), (req, res) => {
 });
 
 // Ruta para obtener todas las imágenes de una publicación específica
-app.get('/publicacion/:id/imagenes', (req, res) => {
+app.get('/publicacion/:id/imagenes',isLoggedIn, (req, res) => {
   const publicacionId = req.params.id;
 
   // Consulta para obtener las IDs de las imágenes de la publicación
@@ -387,7 +387,7 @@ app.get('/publicacion/:id/imagenes', (req, res) => {
 });
 
 // Ruta para obtener las imágenes de una publicación
-app.get('/imagen/:id', (req, res) => {
+app.get('/imagen/:id' , isLoggedIn,(req, res) => {
   const imagenId = req.params.id;
 
   const query = 'SELECT imagen FROM IMAGENES WHERE id = ?';
@@ -407,7 +407,7 @@ app.get('/imagen/:id', (req, res) => {
   });
 });
 
-app.get('/publicacion/detalle/:id', (req, res) => {
+app.get('/publicacion/detalle/:id', isLoggedIn,(req, res) => {
   const idPublicacion = req.params.id;
 
   const queryPublicacion = 'SELECT id, titulo, descripcion, precio_estimado FROM publicacion WHERE id = ?';
@@ -438,7 +438,7 @@ app.get('/publicacion/detalle/:id', (req, res) => {
       });
   });
 });
-app.get('/borrar_publicacion/:id', (req, res)=>{
+app.get('/borrar_publicacion/:id', isLoggedIn,(req, res)=>{
   //Guardamos el id de la publicacion en un parametro para acceder a ella
   const idPublicacion = req.params.id;
   const queryDeletePublicacion = 'DELETE FROM publicacion WHERE id = ?';
