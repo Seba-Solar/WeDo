@@ -78,21 +78,31 @@
               <h5>Publicaciones Activas</h5>
             </div>
             <div>
-              <div class="card mb-3" style="max-width: 540px;">
-                <div class="row g-0">
-                  <div class="col-md-4">
-                    <img src="..." class="img-fluid rounded-start" alt="...">
-                  </div>
-                  <div class="col-md-8">
-                    <div class="card-body">
-                      <h5 class="card-title">Publicacion Test</h5>
-                      <p class="card-text">Descripcion de la imagen</p>
-                      <p class="fst-italic">Precio Estimado</p>
-                      <p class="card-text"><small class="text-body-secondary">Fecha de publicacion</small></p>
+              <% publicacionesRelacionadas.forEach(publicacion => { %>
+                <div class="container d-flex justify-content-center">
+                  <div class="row w-75 mb-3">
+                    <div class="card p-0" style="max-width: 540px;">
+                      <div class="row g-0">
+                        <div class="col-md-4">
+                          <img src="/imagen/<%= publicacion.id %>" class="img-fluid rounded-start" alt="<%= publicacion.titulo %>" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                        </div>
+                        <div class="col-md-8">
+                          <div class="card-body">
+                            <h5 class="card-title"><%= publicacion.titulo %></h5>
+                            <p class="card-text"><%= publicacion.descripcion %></p>
+                            <p class="fst-italic"><%= publicacion.precio_estimado %></p>
+                            <button type="button" class="btn btn-primary">
+                              <a href="/publicacion/detalle/<%= publicacion.id %>" style="color: white; text-decoration: none;">Ver Publicacion</a>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              <% }); %>
+              
+              
             </div>
           </div>
         </div>
@@ -100,6 +110,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="/js/profile.js"></script>
+    <script src="/js/profile.js">
+      console.log(publicacionesRelacionadas);
+    </script>
   </body>
 </html>

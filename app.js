@@ -6,16 +6,18 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 
-//Para la creacion de imagenes y guardar la memoria y su buffer usaremos
+//Para Guardar la memoria y su buffer de imagenes
 //Multer Storage y Upload
 const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-
-// Middleware para analizar el cuerpo de las solicitudes JSON
+// Para usar json
 app.use(express.json());
-// Para cargar los detalles de las publicaciones
+
+app.use(express.urlencoded({ extended: true }));
+
+//Habilitamos el motor de vistas EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -23,6 +25,9 @@ app.set('views', path.join(__dirname, 'views'));
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
 });
+
+//Carga de los estaticos
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Conexión a la base de datos
 let conexion = mysql.createConnection({
@@ -37,13 +42,14 @@ conexion.connect(function(err) {
   console.log("Connected!");
 });
 
-//Carga de los estaticos
-app.use(express.static(path.join(__dirname, 'public')));
+//Hacer uso de la sesiones
 app.use(session({
 	secret: 'secret',
 	resave: true,
 	saveUninitialized: true
 }));
+
+
 //Middelware para controlar el acceso a las paginas solamente si el usuario esta logeado
 function isLoggedIn(req, res, next) {
   if (req.session.loggedin) {
@@ -52,10 +58,6 @@ function isLoggedIn(req, res, next) {
       res.redirect('/login');
   }
 }
-
-//Necesarios para manipular la session del usuario
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 app.post('/auth', function(request, response) {
 	let correo = request.body.correo;
@@ -66,15 +68,15 @@ app.post('/auth', function(request, response) {
 			if (error) throw error;
 
 			if (results.length > 0) {
-				// Client credentials are valid
+				
 				request.session.loggedin = true;
 				request.session.correo = correo;
 				request.session.userId = results[0].id;
 				request.session.nombre = results[0].nombre;
 				
-				return response.redirect('/publicaciones'); // Use return to prevent further execution
+				return response.redirect('/publicaciones'); 
 			} else {
-				// Check for company credentials
+				
 				conexion.query('SELECT * FROM empresa WHERE correo = ? AND pass = ?', [correo, pass], function(error, results) {
 					if (error) throw error;
 
@@ -86,10 +88,10 @@ app.post('/auth', function(request, response) {
 						request.session.userId = results[0].id;
 						request.session.nombre = results[0].nombre;
 
-						return response.redirect('/publicaciones'); // Use return to prevent further execution
+						return response.redirect('/publicaciones');
 					} else {
-						// Invalid credentials
-						return response.send('Credenciales inválidas'); // Send response and return
+						
+						return response.send('Credenciales inválidas'); 
 					}
 				});
 			}
@@ -101,7 +103,6 @@ app.post('/auth', function(request, response) {
 
 // Cerrar session
 app.get('/logout', function (req, res, next) {
-  // logout logic
   req.session.user = null
   req.session.save(function (err) {
     if (err) next(err)
@@ -119,16 +120,34 @@ app.get('/', (req, res) => {
 app.get('/index', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
-// Acceso con las variables del usuario
+
 app.get('/profile',isLoggedIn, (req, res) => {
   let usuario = {
     correo: req.session.correo,
     nombre: req.session.nombre,
     id_usuario: req.session.userId
   };
-  
   console.log('ID USUARIO',usuario.id_usuario);
-  res.render('profile', { usuario });
+
+  //Query para cargar los datos que corresponden al usuario que ingreso.
+  const queryPublicacionesPorId = ' SELECT * FROM publicacion WHERE id_cliente = ? OR id_empresa = ?'
+  conexion.query(queryPublicacionesPorId,[usuario.id_usuario, usuario.id_usuario], (err, results) =>{
+    if  (err ) {
+      console.error(err);
+    } else if (results.length === 0 ){
+      console.log({ message: 'No tiene publicaciones ligada a la cuenta'});
+    }
+    
+    const publicacionesRelacionadas = results;
+    res.render('profile', { usuario , publicacionesRelacionadas });
+  });
+  // conexion.query(queryImagen,[publicacionesRelacionadas.id], (err,results)=>{
+  //   if  (err ) {
+  //     console.err(err);
+  //   }
+  //   const imagen = results[0];
+  // });
+  
 });
 
 
@@ -160,7 +179,7 @@ app.get('/getClientes', (req, res) => {
       res.status(500).send({ message: 'Error al obtener datos' });
       console.log(req.query);
     } else {
-      res.send(results);
+      res.json(results)
       
     }
   });
@@ -174,7 +193,7 @@ app.get('/getEmpresas', (req, res) => {
       res.status(500).send({ message: 'Error al obtener datos' });
       console.log(req.query);
     } else {
-      res.send(results);
+      res.json(results)
       
     }
   });
@@ -395,7 +414,7 @@ app.get('/publicacion/:id/imagenes',isLoggedIn, (req, res) => {
 app.get('/imagen/:id' , isLoggedIn,(req, res) => {
   const imagenId = req.params.id;
 
-  const query = 'SELECT imagen FROM IMAGENES WHERE id = ?';
+  const query = 'SELECT imagen FROM IMAGENES WHERE publicacion_id = ?';
   conexion.query(query, [imagenId], (err, results) => {
       if (err) {
           console.error(err);
@@ -406,7 +425,7 @@ app.get('/imagen/:id' , isLoggedIn,(req, res) => {
           return res.status(404).send({ message: 'Imagen no encontrada' });
       }
 
-      // Configurar el tipo de contenido adecuado (en este caso asumimos que es imagen JPEG)
+     
       res.setHeader('Content-Type', 'image/jpeg');
       res.send(results[0].imagen);
   });
