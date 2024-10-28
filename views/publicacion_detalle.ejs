@@ -58,6 +58,12 @@
                         <p class="card-text"><%= publicacion.descripcion %></p>
                         <br>
                         <p class="card-text">Precio Estimado: <%= publicacion.precio_estimado %></p>
+                        <div>
+                          <p>¿Desea eliminar la publicacion?</p>
+                          <br>
+                          <button class="btn btn-danger"><a href="/borrar_publicacion/<%= publicacion.id %>">Eliminar publicacion</a></button>
+                          
+                        </div>
                     </div>
                 </div>
             </div>

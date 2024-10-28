@@ -87,6 +87,25 @@ app.post('/auth', function(request, response) {
 	}
 });
 
+// Cerrar session
+app.get('/logout', function (req, res, next) {
+  // logout logic
+
+  // clear the user from the session object and save.
+  // this will ensure that re-using the old session id
+  // does not have a logged in user
+  req.session.user = null
+  req.session.save(function (err) {
+    if (err) next(err)
+
+    // regenerate the session, which is good practice to help
+    // guard against forms of session fixation
+    req.session.regenerate(function (err) {
+      if (err) next(err)
+      res.redirect('/')
+    })
+  })
+});
 
 // Routing
 app.get('/', (req, res) => {
@@ -418,4 +437,25 @@ app.get('/publicacion/detalle/:id', (req, res) => {
           res.render('publicacion_detalle', { publicacion, imagenes });
       });
   });
+});
+app.get('/borrar_publicacion/:id', (req, res)=>{
+  //Guardamos el id de la publicacion en un parametro para acceder a ella
+  const idPublicacion = req.params.id;
+  const queryDeletePublicacion = 'DELETE FROM publicacion WHERE id = ?';
+  const queryDeleteImagenesPublicacion ='DELETE FROM imagenes WHERE publicacion_id = ?';
+
+  //Primero se elimina las imagenes por relacion.
+  conexion.query(queryDeleteImagenesPublicacion, [idPublicacion], (err) => {
+    if (err) {
+        console.error(err);
+        return res.status(500).send({ message: 'Error al eliminar la imagen las imágenes' });
+    }
+  });
+  conexion.query(queryDeletePublicacion, [idPublicacion], (err) => {
+    if (err) {
+        console.error(err);
+        return res.status(500).send({ message: 'Error al eliminar la imagen las imágenes' });
+    }
+  });
+  res.redirect('/publicaciones');
 });
