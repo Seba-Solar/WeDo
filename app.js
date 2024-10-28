@@ -141,13 +141,6 @@ app.get('/profile',isLoggedIn, (req, res) => {
     const publicacionesRelacionadas = results;
     res.render('profile', { usuario , publicacionesRelacionadas });
   });
-  // conexion.query(queryImagen,[publicacionesRelacionadas.id], (err,results)=>{
-  //   if  (err ) {
-  //     console.err(err);
-  //   }
-  //   const imagen = results[0];
-  // });
-  
 });
 
 
