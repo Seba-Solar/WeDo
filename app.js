@@ -227,7 +227,7 @@ app.post('/registrar', upload.single('imagen_p'), (req, res) => {
 // -------------- REGISTER ---------------- //
 app.post('/registrar_empresa_datos', upload.single('imagen_p'), (req, res) => {
   
-  const nombre = req.body.usuario;
+  const nombre = req.body.nombre;
   const pass = req.body.pass; 
   const correo = req.body.email;
   const rut_empresa = req.body.rut;
