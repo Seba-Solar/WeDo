@@ -279,7 +279,7 @@ app.post('/registrar_empresa_datos', upload.single('imagen_p'), (req, res) => {
     return res.status(400).send({ message: 'Se requiere una imagen de perfil' });
   }
 
-  const query = `INSERT INTO empresa (nombre, pass, imagen_p, rut, correo, telefono, direccion, razon) 
+  const query = `INSERT INTO empresa (nombre, pass, imagen_p, rut_empresa, correo, telefono, direccion, razon) 
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
   const values = [nombre, pass, imagen_p, rut_empresa, correo, telefono, direccion, razon];
@@ -476,3 +476,43 @@ app.get('/borrar_publicacion/:id', isLoggedIn,(req, res)=>{
   });
   res.redirect('/publicaciones');
 });
+
+app.post('/cotizar_publicacion',isLoggedIn, (req,res)=>{
+  
+  const idPublicacion = req.body.id_publicacion;
+
+  let usuario = {
+    correo: req.session.correo,
+    nombre: req.session.nombre,
+    id_empresa: req.session.userId
+  };
+  
+  const cotizacion = req.body.valor_oferta;
+
+  const queryInfoPublicacion = 'SELECT nombre_cliente,precio_estimado FROM publicacion WHERE id = ?';
+  const queryCotizarPublicacion = `
+  INSERT INTO HISTORIAL_PUBLICACION 
+  (id_publicacion, precio_estimado, id_empresa, nombre_empresa, valor_oferta) 
+  VALUES (?, ?, ?, ?, ?)
+`;
+
+  conexion.query(queryInfoPublicacion,[idPublicacion], (err, resultado)=>{
+    if (err){
+      console.error(err);
+      return res.status(500).send({ message: 'Se rompio jaja saludos'})
+    }
+    const resultadoPublicacion = resultado[0];
+    const nombreCliente = resultadoPublicacion.nombre_cliente;
+    const precioEstimado = resultadoPublicacion.precio_estimado;
+
+    console.log('Nombre cliente:', nombreCliente, 'Precio estimado:', precioEstimado);
+    conexion.query(queryCotizarPublicacion,[idPublicacion, precioEstimado, usuario.id_empresa, usuario.nombre, cotizacion],(err=>{
+      if  (err){
+        console.error(err);
+        return res.status(500).send({ message: 'Se rompio esta cosa XD'})
+      }
+      res.redirect(`/publicacion/detalle/${idPublicacion}`);
+    }));
+  })
+  
+})
