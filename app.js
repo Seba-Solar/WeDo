@@ -294,25 +294,6 @@ app.post('/registrar_empresa_datos', upload.single('imagen_p'), (req, res) => {
   });
 });
 
-
-// Update de datos del usuario
-// app.post('/update_profile', (req,res) =>{
-//   //Query de usuario
-//   let profile_form_data = {
-//     nombre: xxx,
-//     correo: xxx,
-//     pass: xxx,
-//     telefono: xxx,
-//     direccion: xxx,
-//     imagen_p: xxxx
-//   }
-//   const queryUpdateUser = `UPDATE cliente SET nombre = ${profile_form
-//     _data.nombre}, pass, imagen_p, rut, correo, telefono, direccion`;
-//   //Retorno
-// });
-
-
-
 // PUBLICAR
 
 app.post('/publicar', upload.array('imagenes', 10),isLoggedIn, (req, res) => {
@@ -477,42 +458,43 @@ app.get('/borrar_publicacion/:id', isLoggedIn,(req, res)=>{
   res.redirect('/publicaciones');
 });
 
-app.post('/cotizar_publicacion',isLoggedIn, (req,res)=>{
-  
-  const idPublicacion = req.body.id_publicacion;
+app.post('/cotizar_publicacion',isLoggedIn, (req,res)=>{  
+  if (req.session.isEmpresa == true){
 
-  let usuario = {
-    correo: req.session.correo,
-    nombre: req.session.nombre,
-    id_empresa: req.session.userId
-  };
-  
-  const cotizacion = req.body.valor_oferta;
+    const idPublicacion = req.body.id_publicacion;
 
-  const queryInfoPublicacion = 'SELECT nombre_cliente,precio_estimado FROM publicacion WHERE id = ?';
-  const queryCotizarPublicacion = `
-  INSERT INTO HISTORIAL_PUBLICACION 
-  (id_publicacion, precio_estimado, id_empresa, nombre_empresa, valor_oferta) 
-  VALUES (?, ?, ?, ?, ?)
-`;
+    let usuario = {
+      correo: req.session.correo,
+      nombre: req.session.nombre,
+      id_empresa: req.session.userId
+    };
+    const cotizacion = req.body.valor_oferta;
 
-  conexion.query(queryInfoPublicacion,[idPublicacion], (err, resultado)=>{
-    if (err){
-      console.error(err);
-      return res.status(500).send({ message: 'Se rompio jaja saludos'})
-    }
-    const resultadoPublicacion = resultado[0];
-    const nombreCliente = resultadoPublicacion.nombre_cliente;
-    const precioEstimado = resultadoPublicacion.precio_estimado;
+    const queryInfoPublicacion = 'SELECT nombre_cliente,precio_estimado FROM publicacion WHERE id = ?';
+    const queryCotizarPublicacion = `INSERT INTO HISTORIAL_PUBLICACION (id_publicacion, precio_estimado, id_empresa, nombre_empresa, valor_oferta) VALUES (?, ?, ?, ?, ?)`;
 
-    console.log('Nombre cliente:', nombreCliente, 'Precio estimado:', precioEstimado);
-    conexion.query(queryCotizarPublicacion,[idPublicacion, precioEstimado, usuario.id_empresa, usuario.nombre, cotizacion],(err=>{
-      if  (err){
+    conexion.query(queryInfoPublicacion,[idPublicacion], (err, resultado)=>{
+      if (err){
         console.error(err);
-        return res.status(500).send({ message: 'Se rompio esta cosa XD'})
+        return res.status(500).send({ message: 'Problema con la informacion de publicacion'})
       }
-      res.redirect(`/publicacion/detalle/${idPublicacion}`);
-    }));
-  })
+      const resultadoPublicacion = resultado[0];
+      const nombreCliente = resultadoPublicacion.nombre_cliente;
+      const precioEstimado = resultadoPublicacion.precio_estimado;
+
+      conexion.query(queryCotizarPublicacion,[idPublicacion, precioEstimado, usuario.id_empresa, usuario.nombre, cotizacion],(err=>{
+        if  (err){
+          console.error(err);
+          return res.status(500).send({ message: 'Problema al cotizar'})
+        }
+        res.redirect(`/publicacion/detalle/${idPublicacion}`);
+      }));
+    })
+
+    }else{
+      const e = new Error("No puede realizar cotizaciones sin ser una empresa!");
+      console.error(e);
+      return res.status(500).send({ message: 'Error no tienes acceso a esta funcionalidad' })
+    }
   
 })

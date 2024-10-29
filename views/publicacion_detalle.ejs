@@ -58,24 +58,25 @@
                         <p class="card-text"><%= publicacion.descripcion %></p>
                         <br>
                         <p class="card-text">Precio Estimado: <%= publicacion.precio_estimado %></p>
-                        <div>
                         
-                          <p>¿Desea eliminar la publicacion?</p>                          
-                          <button class="btn btn-danger"><a href="/borrar_publicacion/<%= publicacion.id %>">Eliminar publicacion</a></button>
-                          <p>¿Desea cotizar la publicacion?</p>
-                          <form action="/cotizar_publicacion" method="POST" id="registerForm">
-                            <div class="form-group mb-3">
-                              <input type="hidden" name="id_publicacion" value="<%= publicacion.id %>">
-                              <label for="valor_oferta" class="form-label">Cotizacion</label>
-                              <input type="text" class="form-control" id="valor_oferta" name="valor_oferta" placeholder="Ingresa un valor de cotizacion" required>
-                          </div>
-                            <button type="submit" class="btn btn-sucess">Enviar Cotizacion</button>
-                          </form>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+    <div class="row">
+      <div class="row">
+        <!-- Titulo -->
+        <h1>Historial de Cotizaciones</h1>
+      </div>
+      <div class="col-3">
+        <div>
+          <!-- Aqui iria a imagen de la empresa -->
+        </div>
+      </div>
+      <div class="col-6">
+
+      </div>
     </div>
 </div>
 
