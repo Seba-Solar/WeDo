@@ -62,6 +62,14 @@
                   </div>
               </div>
           </div>
+          <div>
+            <form action="/cotizar_publicacion" method="POST"> 
+              <input type="hidden" name="publicacion_id" value="<%= publicacion.id %>">
+              <label for="cotizacion" class="form-label">Ingresa valor cotizacion</label>
+              <input class="form-control" name="valor_oferta" placeholder="Monto de cotizacion">
+              <button type="submit" class="btn-primary"><a href="/publicacion/detalle/<%= publicacion.id %>">Enviar cotizacion</a></button>
+            </form>            
+          </div>
       </div>
   </div>
 </div>

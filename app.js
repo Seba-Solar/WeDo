@@ -131,7 +131,7 @@ app.get('/profile',isLoggedIn, (req, res) => {
 
   //Query para cargar los datos que corresponden al usuario que ingreso.
   const queryPublicacionesPorId = ' SELECT * FROM publicacion WHERE id_cliente = ? OR id_empresa = ?';
-  const queryConsumoHistorial = `SELECT id_publicacion, precio_es timado, id_empresa, nombre_empresa, valor_oferta FROM historial_publicacion WHERE id_publicacion = ?`;
+  const queryConsumoHistorial = `SELECT id_publicacion, precio_estimado, id_empresa, nombre_empresa, valor_oferta FROM historial_publicacion WHERE id_publicacion = ?`;
   conexion.query(queryPublicacionesPorId,[usuario.id_usuario, usuario.id_usuario], (err, results) =>{
     if  (err ) {
       console.error(err);
@@ -140,7 +140,16 @@ app.get('/profile',isLoggedIn, (req, res) => {
     }
     
     const publicacionesRelacionadas = results;
-    res.render('profile', { usuario , publicacionesRelacionadas });
+    
+    conexion.query(queryConsumoHistorial,[publicacionesRelacionadas.id_publicacion],(err,results) =>{
+      if (err){
+        console.error(err);
+      } else if(results.length === 0){
+          console.log({ message: 'No hay cotizaciones aun de esta publicacion', results})
+      }
+      const historialPublicaciones = results;
+      res.render('profile', { usuario , publicacionesRelacionadas, historialPublicaciones });
+    })
   });
 });
 
@@ -457,10 +466,9 @@ app.get('/borrar_publicacion/:id', isLoggedIn,(req, res)=>{
   res.redirect('/publicaciones');
 });
 
-app.post('/cotizar_publicacion',isLoggedIn, (req,res)=>{  
-  if (req.session.isEmpresa == true){
-
-    const idPublicacion = req.body.id_publicacion;
+app.post('/cotizar_publicacion', isLoggedIn, (req, res) => {
+  if (req.session.isEmpresa == true) {
+    const idPublicacion = req.body.publicacion_id;
 
     let usuario = {
       correo: req.session.correo,
@@ -469,31 +477,34 @@ app.post('/cotizar_publicacion',isLoggedIn, (req,res)=>{
     };
     const cotizacion = req.body.valor_oferta;
 
-    const queryInfoPublicacion = 'SELECT nombre_cliente,precio_estimado FROM publicacion WHERE id = ?';
+    const queryInfoPublicacion = 'SELECT nombre_cliente, precio_estimado FROM publicacion WHERE id = ?';
     const queryCotizarPublicacion = `INSERT INTO HISTORIAL_PUBLICACION (id_publicacion, precio_estimado, id_empresa, nombre_empresa, valor_oferta) VALUES (?, ?, ?, ?, ?)`;
-    
-    conexion.query(queryInfoPublicacion,[idPublicacion], (err, resultado)=>{
-      if (err){
+    console.log(idPublicacion);
+    conexion.query(queryInfoPublicacion, [idPublicacion], (err, resultado) => {
+      if (err) {
         console.error(err);
-        return res.status(500).send({ message: 'Problema con la informacion de publicacion'})
+        return res.status(500).send({ message: 'Problema con la información de publicación' });
       }
+
+      if (resultado.length === 0) {
+        return res.status(404).send({ message: 'Publicación no encontrada' });
+      }
+
       const resultadoPublicacion = resultado[0];
-      const nombreCliente = resultadoPublicacion.nombre_cliente;
       const precioEstimado = resultadoPublicacion.precio_estimado;
 
-      conexion.query(queryCotizarPublicacion,[idPublicacion, precioEstimado, usuario.id_empresa, usuario.nombre, cotizacion],(err=>{
-        if  (err){
+      conexion.query(queryCotizarPublicacion, [idPublicacion, precioEstimado, usuario.id_empresa, usuario.nombre, cotizacion], (err) => {
+        if (err) {
           console.error(err);
-          return res.status(500).send({ message: 'Problema al cotizar'})
+          return res.status(500).send({ message: 'Problema al cotizar' });
         }
         res.redirect(`/publicacion/detalle/${idPublicacion}`);
-      }));
-    })
+      });
+    });
 
-    }else{
-      const e = new Error("No puede realizar cotizaciones sin ser una empresa!");
-      console.error(e);
-      return res.status(500).send({ message: 'Error no tienes acceso a esta funcionalidad' })
-    }
-  
-})
+  } else {
+    const e = new Error("No puede realizar cotizaciones sin ser una empresa!");
+    console.error(e);
+    return res.status(500).send({ message: 'Error, no tienes acceso a esta funcionalidad' });
+  }
+});
