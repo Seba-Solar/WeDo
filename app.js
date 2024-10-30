@@ -130,7 +130,8 @@ app.get('/profile',isLoggedIn, (req, res) => {
   console.log('ID USUARIO',usuario.id_usuario);
 
   //Query para cargar los datos que corresponden al usuario que ingreso.
-  const queryPublicacionesPorId = ' SELECT * FROM publicacion WHERE id_cliente = ? OR id_empresa = ?'
+  const queryPublicacionesPorId = ' SELECT * FROM publicacion WHERE id_cliente = ? OR id_empresa = ?';
+  const queryConsumoHistorial = `SELECT id_publicacion, precio_es timado, id_empresa, nombre_empresa, valor_oferta FROM historial_publicacion WHERE id_publicacion = ?`;
   conexion.query(queryPublicacionesPorId,[usuario.id_usuario, usuario.id_usuario], (err, results) =>{
     if  (err ) {
       console.error(err);
@@ -410,7 +411,7 @@ app.get('/publicacion/detalle/:id', isLoggedIn,(req, res) => {
 
   const queryPublicacion = 'SELECT id, titulo, descripcion, precio_estimado FROM publicacion WHERE id = ?';
   const queryImagen = 'SELECT imagen FROM IMAGENES WHERE publicacion_id = ?'; // Cambia esto si es necesario
-
+  
   conexion.query(queryPublicacion, [idPublicacion], (err, resultadosPublicacion) => {
       if (err) {
           console.error(err);
@@ -428,10 +429,8 @@ app.get('/publicacion/detalle/:id', isLoggedIn,(req, res) => {
               console.error(err);
               return res.status(500).send({ message: 'Error al obtener las imágenes' });
           }
-
           // Extraer las imágenes
           const imagenes = resultadosImagen.map(row => row.imagen);
-
           res.render('publicacion_detalle', { publicacion, imagenes });
       });
   });
@@ -472,7 +471,7 @@ app.post('/cotizar_publicacion',isLoggedIn, (req,res)=>{
 
     const queryInfoPublicacion = 'SELECT nombre_cliente,precio_estimado FROM publicacion WHERE id = ?';
     const queryCotizarPublicacion = `INSERT INTO HISTORIAL_PUBLICACION (id_publicacion, precio_estimado, id_empresa, nombre_empresa, valor_oferta) VALUES (?, ?, ?, ?, ?)`;
-
+    
     conexion.query(queryInfoPublicacion,[idPublicacion], (err, resultado)=>{
       if (err){
         console.error(err);
