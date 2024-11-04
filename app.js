@@ -420,7 +420,8 @@ app.get('/publicacion/detalle/:id', isLoggedIn,(req, res) => {
 
   const queryPublicacion = 'SELECT id, titulo, descripcion, precio_estimado FROM publicacion WHERE id = ?';
   const queryImagen = 'SELECT imagen FROM IMAGENES WHERE publicacion_id = ?'; // Cambia esto si es necesario
-  
+  const queryHistorialPorId = `SELECT id , id_publicacion, id_empresa, nombre_empresa, precio_estimado, valor_oferta FROM historial_publicacion WHERE id_publicacion = ?`
+
   conexion.query(queryPublicacion, [idPublicacion], (err, resultadosPublicacion) => {
       if (err) {
           console.error(err);
@@ -440,7 +441,13 @@ app.get('/publicacion/detalle/:id', isLoggedIn,(req, res) => {
           }
           // Extraer las imágenes
           const imagenes = resultadosImagen.map(row => row.imagen);
-          res.render('publicacion_detalle', { publicacion, imagenes });
+          
+          conexion.query(queryHistorialPorId, [idPublicacion], (err, resultadosHistorial) =>{
+            if (err){console.log('Hubo en error trayendo el historial de cotizaciones de la publicacion')}
+            const historial_publicacion = resultadosHistorial;
+            console.log(historial_publicacion);
+            res.render('publicacion_detalle', { publicacion, imagenes, historial_publicacion });
+          })
       });
   });
 });
@@ -508,3 +515,32 @@ app.post('/cotizar_publicacion', isLoggedIn, (req, res) => {
     return res.status(500).send({ message: 'Error, no tienes acceso a esta funcionalidad' });
   }
 });
+
+app.get('/historial_publicacion/:id', isLoggedIn,(req, res)=>{
+  const idPublicacion = req.params.id;
+  const queryHistorialPorId = `SELECT id , id_publicacion, id_empresa, nombre_empresa, precio_estimado, valor_oferta FROM historial_publicacion WHERE id_publicacion = ?`
+
+  conexion.query(queryHistorialPorId,[idPublicacion], (err, resultados) =>{
+    if (err) {
+      console.error(err);
+      return res.status(500).send({ message: 'Problema con la información del historial de cotizaciones' });
+    }
+    if (resultados.length === 0) {
+      return console.log('No hay historial en esta publicacion')
+    }
+    return resultados;
+  })
+})
+
+app.get('/foto_empresa/:id', isLoggedIn,(req,res)=>{
+  const idHistorialPublicacion = req.params.id;
+  const queryTraerImagenHistorialPublicacion = 'SELECT imagen_p FROM empresa WHERE id = ?'
+  conexion.query(queryTraerImagenHistorialPublicacion,[idHistorialPublicacion],(err, resultado)=>{
+    if (err){
+      return console.log('No tiene imagen la empresa')
+    }
+    const imagenEmpresa = resultado[0].imagen_p;
+    res.set('Content-Type', 'image/png')
+    res.send(imagenEmpresa); 
+  })
+})
