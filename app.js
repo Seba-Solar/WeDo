@@ -416,9 +416,11 @@ app.get('/imagen/:id' , isLoggedIn,(req, res) => {
 });
 
 app.get('/publicacion/detalle/:id', isLoggedIn,(req, res) => {
+  let empresa = req.session.isEmpresa;
+  let idUsuario = req.session.userId;
   const idPublicacion = req.params.id;
 
-  const queryPublicacion = 'SELECT id, titulo, descripcion, precio_estimado FROM publicacion WHERE id = ?';
+  const queryPublicacion = 'SELECT id, titulo, descripcion, precio_estimado,id_cliente FROM publicacion WHERE id = ?';
   const queryImagen = 'SELECT imagen FROM IMAGENES WHERE publicacion_id = ?'; // Cambia esto si es necesario
   const queryHistorialPorId = `SELECT id , id_publicacion, id_empresa, nombre_empresa, precio_estimado, valor_oferta FROM historial_publicacion WHERE id_publicacion = ?`
 
@@ -446,7 +448,8 @@ app.get('/publicacion/detalle/:id', isLoggedIn,(req, res) => {
             if (err){console.log('Hubo en error trayendo el historial de cotizaciones de la publicacion')}
             const historial_publicacion = resultadosHistorial;
             console.log(historial_publicacion);
-            res.render('publicacion_detalle', { publicacion, imagenes, historial_publicacion });
+            console.log(empresa)
+            res.render('publicacion_detalle', { publicacion, imagenes, historial_publicacion, empresa, idUsuario });
           })
       });
   });
@@ -509,10 +512,6 @@ app.post('/cotizar_publicacion', isLoggedIn, (req, res) => {
       });
     });
 
-  } else {
-    const e = new Error("No puede realizar cotizaciones sin ser una empresa!");
-    console.error(e);
-    return res.status(500).send({ message: 'Error, no tienes acceso a esta funcionalidad' });
   }
 });
 

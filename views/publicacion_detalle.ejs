@@ -63,12 +63,14 @@
               </div>
           </div>
           <div>
-            <form action="/cotizar_publicacion" method="POST"> 
-              <input type="hidden" name="publicacion_id" value="<%= publicacion.id %>">
-              <label for="cotizacion" class="form-label">Ingresa valor cotizacion</label>
-              <input class="form-control" name="valor_oferta" placeholder="Monto de cotizacion">
-              <button type="submit" class="btn btn-primary">Enviar cotizacion</button>
-            </form>            
+            <%if (empresa === true) { %>
+                <form action="/cotizar_publicacion" method="POST"> 
+                  <input type="hidden" name="publicacion_id" value="<%= publicacion.id %>">
+                  <label for="cotizacion" class="form-label">Ingresa valor cotizacion</label>
+                  <input class="form-control" name="valor_oferta" placeholder="Monto de cotizacion">
+                  <button type="submit" class="btn btn-primary">Enviar cotizacion</button>
+                </form>    
+              <% } %>   
           </div>
       </div>
   </div>
@@ -84,20 +86,22 @@
 
   <div class="container d-flex justify-content-center">
     <div class="row d-flex flex-column align-items-center">
-      <% historial_publicacion.forEach(function(publicacion) { %>
+      <% historial_publicacion.forEach(function(publicacion_h) { %>
         <div class="w-75 mb-3">
           <div class="card mb-3" style="max-width: 540px;">
             <div class="row g-0">
               <div class="col-md-4">
-                <img src="/foto_empresa/<%= publicacion.id_empresa %>" class="img-fluid rounded-start" alt="<%= publicacion.nombre_empresa %>">
+                <img src="/foto_empresa/<%= publicacion_h.id_empresa %>" class="img-fluid rounded-start" alt="<%= publicacion.nombre_empresa %>">
               </div>
               <div class="col-md-8">
                 <div class="card-body">
-                  <h5 class="card-title"><%= publicacion.nombre_empresa %></h5>
-                  <p class="card-text"><%= publicacion.valor_oferta %></p>
-                  <p class="card-text">
-                    <button type="button" class="btn btn-success"><a style="color: white; text-decoration: none;">Aceptar oferta</a></button>
-                  </p>
+                  <h5 class="card-title"><%= publicacion_h.nombre_empresa %></h5>
+                  <p class="card-text"><%= publicacion_h.valor_oferta %></p>
+                  <%if (idUsuario === publicacion.id_cliente) { %>
+                    <p class="card-text">
+                      <button type="button" class="btn btn-success"><a style="color: white; text-decoration: none;">Aceptar oferta</a></button>
+                    </p>
+                    <% } %>
                 </div>
               </div>
             </div>
