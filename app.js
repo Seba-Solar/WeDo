@@ -474,7 +474,7 @@ app.get('/borrar_publicacion/:id', isLoggedIn,(req, res)=>{
 });
 
 app.post('/cotizar_publicacion', isLoggedIn, (req, res) => {
-  if (req.session.isEmpresa == true) {
+  if (req.session.isEmpresa === true) {
     const idPublicacion = req.body.publicacion_id;
 
     let usuario = {
