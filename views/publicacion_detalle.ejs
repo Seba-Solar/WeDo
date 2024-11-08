@@ -98,9 +98,17 @@
                   <h5 class="card-title"><%= publicacion_h.nombre_empresa %></h5>
                   <p class="card-text"><%= publicacion_h.valor_oferta %></p>
                   <%if (idUsuario === publicacion.id_cliente) { %>
-                    <p class="card-text">
-                      <button type="button" class="btn btn-success"><a style="color: white; text-decoration: none;">Aceptar oferta</a></button>
-                    </p>
+                    <form action="/aceptar_cotizacion" method="POST">
+                      <input type="hidden" name="IDPublicacion" value="<%= publicacion.id %>">
+                      <input type="hidden" name="idHistorialPublicacion" value="<%= publicacion_h.id %>">
+                      <input type="hidden" name="IDEmpresa" value="<%= publicacion_h.id_empresa %>">
+                      <input type="hidden" name="nombreEmpresa" value="<%= publicacion_h.nombre_empresa %>">
+                      <input type="hidden" name="valor_final" value="<%= publicacion_h.valor_oferta %>">
+                      <button type="submit" class="btn btn-success"><a style="color: white; text-decoration: none;">Aceptar oferta</a></button>
+                    </form>
+                    <form action="/rechazar_cotizacion" method="POST">
+                      <button type="button" class="btn btn-danger"><a style="color: white; text-decoration: none;">Rechazar oferta</a></button>
+                    </form>
                     <% } %>
                 </div>
               </div>

@@ -9,6 +9,7 @@ const session = require('express-session');
 //Para Guardar la memoria y su buffer de imagenes
 //Multer Storage y Upload
 const multer = require('multer');
+const { domainToASCII } = require('url');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -448,7 +449,6 @@ app.get('/publicacion/detalle/:id', isLoggedIn,(req, res) => {
             if (err){console.log('Hubo en error trayendo el historial de cotizaciones de la publicacion')}
             const historial_publicacion = resultadosHistorial;
             console.log(historial_publicacion);
-            console.log(empresa)
             res.render('publicacion_detalle', { publicacion, imagenes, historial_publicacion, empresa, idUsuario });
           })
       });
@@ -543,3 +543,22 @@ app.get('/foto_empresa/:id', isLoggedIn,(req,res)=>{
     res.send(imagenEmpresa); 
   })
 })
+
+app.post('/aceptar_cotizacion', isLoggedIn, (req, res) => {
+  const idPublicacion = req.body.IDPublicacion;
+  const idHistorial = req.body.idHistorialPublicacion;
+  const idEmpresa = req.body.IDEmpresa;
+  const nombreEmpresa = req.body.nombreEmpresa;
+  const valor_final = req.body.valor_final;
+  const status = "Cotizado";
+  
+  const queryAceptarCotizacion = `UPDATE publicacion SET id_empresa = ?, nombre_empresa = ?, id_cotizacion = ?,valor_final = ?, status = ? WHERE id = ?;`;
+
+  conexion.query(queryAceptarCotizacion, [idEmpresa, nombreEmpresa, idHistorial,valor_final, status, idPublicacion], (err, resultado) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).send("Error al aceptar la cotización.");
+    }
+    
+  });
+});
