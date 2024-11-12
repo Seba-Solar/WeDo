@@ -421,7 +421,7 @@ app.get('/publicacion/detalle/:id', isLoggedIn,(req, res) => {
   let idUsuario = req.session.userId;
   const idPublicacion = req.params.id;
 
-  const queryPublicacion = 'SELECT id, titulo, descripcion, precio_estimado,id_cliente FROM publicacion WHERE id = ?';
+  const queryPublicacion = 'SELECT id, titulo, descripcion, precio_estimado,id_cliente, status FROM publicacion WHERE id = ?';
   const queryImagen = 'SELECT imagen FROM IMAGENES WHERE publicacion_id = ?'; // Cambia esto si es necesario
   const queryHistorialPorId = `SELECT id , id_publicacion, id_empresa, nombre_empresa, precio_estimado, valor_oferta FROM historial_publicacion WHERE id_publicacion = ?`
 
@@ -559,6 +559,6 @@ app.post('/aceptar_cotizacion', isLoggedIn, (req, res) => {
       console.log(err);
       return res.status(500).send("Error al aceptar la cotización.");
     }
-    
+    res.redirect(`/publicacion/detalle/${idPublicacion}`);
   });
 });
