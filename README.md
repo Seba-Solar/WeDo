@@ -1,8 +1,8 @@
-## ¡¡ WEDO !!
+# WEDO 
 
 - Wedo es una pagina estilo Marketplace para que nuestros clientes publiquen sus necesidades de servicios de construccion y remodelacion.
 
-# Requiere MYSQL y NODEJS para su funcionamiento
+## Requiere MYSQL y NODEJS para su funcionamiento
 
 - Paso a paso para la instalacion (Entorno local).
   - Descargar e instalar LARAGON
@@ -12,7 +12,7 @@
   - (Ejecutar el servidor de manera local) npx nodemon
   Con todo este proceso el servicio funcionara de manera local dentro de la maquina que se ejecute.
 
-# DESARROLLADORES
+## DESARROLLADORES
 
 🟩 Sebastian Solar
 🟨 Ignacio Mardones
